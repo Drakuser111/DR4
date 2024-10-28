@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คำราชาศัพท์</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff8000, #ffcc66);
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            color: #ffc107;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu button {
+            font-size: 2rem;
+            padding: 15px 50px;
+            color: #ff8000;
+            background-color: #ffe066;
+            border: 2px solid #ffcc00;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .menu button:hover {
+            background-color: #ffcc00;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Quiz page styles */
+        .question {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px 50px;
+            border-radius: 50px;
+            font-size: 3rem;
+            color: #ff8000;
+            margin-bottom: 50px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+            border: 3px solid #ffc107;
+            max-width: 70%;
+            margin: 0 auto 50px;
+            text-align: center;
+        }
+
+        .options {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .option {
+            background-color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.8rem;
+            color: #ff8000;
+            cursor: pointer;
+            transition: background-color 0.4s, transform 0.3s, box-shadow 0.3s;
+            border: 2px solid #ffcc00;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 0 20px;
+        }
+
+        .option:hover {
+            background-color: #ffcc00;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .option:active {
+            background-color: #ffc107;
+            transform: translateY(0);
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-message {
+            font-size: 1.8rem;
+            color: white;
+            background-color: #4caf50;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: none;
+            margin-top: 20px;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        /* Results page styling */
+        #resultPage h1 {
+            color: #ffc107;
+            font-size: 3.5rem;
+        }
+
+        #resultPage .score-box {
+            background-color: white;
+            color: #ff8000;
+            padding: 20px 50px;
+            border-radius: 50px;
+            font-size: 2.5rem;
+            margin: 20px;
+        }
+
+        #resultPage button {
+            font-size: 1.8rem;
+            padding: 15px 50px;
+            color: #ff8000;
+            background-color: #ffe066;
+            border: 2px solid #ffcc00;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        #resultPage button:hover {
+            background-color: #ffcc00;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Page -->
+    <div id="startPage" class="container">
+        <h1>คำราชาศัพท์</h1>
+        <div class="menu">
+            <!-- Button to show the quiz page -->
+            <button onclick="startQuiz()">เริ่มต้น</button>
+        </div>
+    </div>
+
+    <!-- Quiz Page -->
+    <div id="quizPage" class="container hidden">
+        <h1 id="questionTitle">คำถามแรก</h1>
+        <div class="question" id="questionText">เท้า</div>
+        <div class="options">
+            <div class="option" id="option1" onclick="checkAnswer(false)">พระศอ</div>
+            <div class="option" id="option2" onclick="checkAnswer(true)">พระบาท</div>
+            <div class="option" id="option3" onclick="checkAnswer(false)">พระโอษฐ์</div>
+        </div>
+        <div id="resultMessage" class="result-message">ตอบถูกต้อง!</div>
+    </div>
+
+    <!-- Result Page -->
+    <div id="resultPage" class="container hidden">
+        <h1>ขอบคุณครับที่เล่นเกมของผมครับ</h1>
+        <div class="score-box">
+            คะแนน <span id="finalScore"></span>/10
+        </div>
+        <button onclick="location.reload()">กลับหน้าแรก</button>
+    </div>
+
+    <footer>
+        © 2024 Royal Vocabulary Quiz | All rights reserved
+    </footer>
+
+    <script>
+        let score = 0;
+        let currentQuestion = 1;
+
+        const questions = [
+            {
+                title: "คำถามแรก",
+                text: "เท้า",
+                options: [
+                    { text: "พระศอ", isCorrect: false },
+                    { text: "พระบาท", isCorrect: true },
+                    { text: "พระโอษฐ์", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามที่สอง",
+                text: "ปาก",
+                options: [
+                    { text: "พระโอษฐ์", isCorrect: true },
+                    { text: "พระกรรณ", isCorrect: false },
+                    { text: "พระเนตร", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามที่สาม",
+                text: "มือ",
+                options: [
+                    { text: "พระขนง", isCorrect: false },
+                    { text: "พระหัตถ์", isCorrect: true },
+                    { text: "พระอุทร", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามที่สี่",
+                text: "ตา",
+                options: [
+                    { text: "พระเนตร", isCorrect: true },
+                    { text: "พระอังสา", isCorrect: false },
+                    { text: "พระองคุลี", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามที่ห้า",
+                text: "จมูก",
+                options: [
+                    { text: "พระเกศา", isCorrect: false },
+                    { text: "พระนาสิก", isCorrect: true },
+                    { text: "พระเศียร", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามที่หก",
+                text: "หัว",
+                options: [
+                    { text: "พระเศียร", isCorrect: true },
+                    { text: "พระชิวหา", isCorrect: false },
+                    { text: "พระกร", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามที่เจ็ด",
+                text: "ผม",
+                options: [
+                    { text: "พระเกศา", isCorrect: true },
+                    { text: "พระหัตถ์", isCorrect: false },
+                    { text: "พระชิวหา", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามที่แปด",
+                text: "คิ้ว",
+                options: [
+                    { text: "พระกรรณ", isCorrect: false },
+                    { text: "พระเกศา", isCorrect: false },
+                    { text: "พระขนง", isCorrect: true }
+                ]
+            },
+            {
+                title: "คำถามที่เก้า",
+                text: "หู",
+                options: [
+                    { text: "พระกรรณ", isCorrect: true },
+                    { text: "พระอุทร", isCorrect: false },
+                    { text: "พระบาท", isCorrect: false }
+                ]
+            },
+            {
+                title: "คำถามสุดท้าย",
+                text: "ฟัน",
+                options: [
+                    { text: "พระทนต์", isCorrect: true },
+                    { text: "พระบาท", isCorrect: false },
+                    { text: "พระเศียร", isCorrect: false }
+                ]
+            }
+        ];
+
+        function startQuiz() {
+            // Hide start page and show quiz page
+            document.getElementById('startPage').classList.add('hidden');
+            document.getElementById('quizPage').classList.remove('hidden');
+        }
+
+        function checkAnswer(isCorrect) {
+            const resultMessage = document.getElementById('resultMessage');
+
+            if (isCorrect) {
+                score++;
+                resultMessage.innerText = 'ตอบถูกต้อง!';
+                resultMessage.style.backgroundColor = '#4caf50';  // Green background for correct
+            } else {
+                resultMessage.innerText = 'ตอบผิด! ลองอีกครั้ง';
+                resultMessage.style.backgroundColor = '#f44336';  // Red background for wrong
+            }
+
+            // Show the result message
+            resultMessage.style.display = 'block';
+
+            // Hide result message and load next question after 1.5 seconds
+            setTimeout(() => {
+                resultMessage.style.display = 'none';
+
+                // Load the next question if available
+                currentQuestion++;
+                if (currentQuestion <= questions.length) {
+                    loadQuestion(currentQuestion - 1);
+                } else {
+                    // Show results page
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        function loadQuestion(index) {
+            const question = questions[index];
+            document.getElementById('questionTitle').innerText = question.title;
+            document.getElementById('questionText').innerText = question.text;
+            document.getElementById('option1').innerText = question.options[0].text;
+            document.getElementById('option2').innerText = question.options[1].text;
+            document.getElementById('option3').innerText = question.options[2].text;
+
+            // Update the click event for each option
+            document.getElementById('option1').setAttribute('onclick', `checkAnswer(${question.options[0].isCorrect})`);
+            document.getElementById('option2').setAttribute('onclick', `checkAnswer(${question.options[1].isCorrect})`);
+            document.getElementById('option3').setAttribute('onclick', `checkAnswer(${question.options[2].isCorrect})`);
+        }
+
+        function showResults() {
+            // Hide quiz page and show results page
+            document.getElementById('quizPage').classList.add('hidden');
+            document.getElementById('resultPage').classList.remove('hidden');
+            
+            // Show final score
+            document.getElementById('finalScore').innerText = score;
+        }
+    </script>
+</body>
+</html>
